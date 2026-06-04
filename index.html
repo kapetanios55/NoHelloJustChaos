@@ -649,16 +649,17 @@
             if (reduceMotion) return;
 
             var dodging = false;
+            var x = 0, y = 0, w = 0, h = 0; // own viewport-space state (top-left + size)
 
             // Drop a fading clone at the button's current spot, Flash-style.
-            function spawnGhost(rect) {
+            function spawnGhost(left, top, width, height) {
                 var ghost = document.createElement('span');
                 ghost.className = 'chaos-ghost';
                 ghost.textContent = btn.textContent;
-                ghost.style.left = rect.left + 'px';
-                ghost.style.top = rect.top + 'px';
-                ghost.style.width = rect.width + 'px';
-                ghost.style.height = rect.height + 'px';
+                ghost.style.left = left + 'px';
+                ghost.style.top = top + 'px';
+                ghost.style.width = width + 'px';
+                ghost.style.height = height + 'px';
                 ghost.style.justifyContent = 'center';
                 document.body.appendChild(ghost);
                 ghost.addEventListener('animationend', function () {
@@ -666,13 +667,34 @@
                 });
             }
 
-            function leap(evt) {
-                var rect = btn.getBoundingClientRect();
-                var btnX = rect.left + rect.width / 2;
-                var btnY = rect.top + rect.height / 2;
+            function clamp(val, min, max) {
+                return Math.max(min, Math.min(max, val));
+            }
 
-                // Leave an after-image where it was standing.
-                spawnGhost(rect);
+            function leap(evt) {
+                var pad = 12;
+
+                // On first dodge, pin the button to its current spot in fixed coords.
+                if (!dodging) {
+                    var rect = btn.getBoundingClientRect();
+                    x = rect.left;
+                    y = rect.top;
+                    w = rect.width;
+                    h = rect.height;
+                    btn.style.position = 'fixed';
+                    btn.style.margin = '0';
+                    btn.style.zIndex = '9999';
+                    btn.style.left = x + 'px';
+                    btn.style.top = y + 'px';
+                    btn.style.transition = 'left 200ms cubic-bezier(.18,.89,.32,1.28), top 200ms cubic-bezier(.18,.89,.32,1.28)';
+                    dodging = true;
+                }
+
+                // Leave an after-image where it currently sits.
+                spawnGhost(x, y, w, h);
+
+                var btnX = x + w / 2;
+                var btnY = y + h / 2;
 
                 // Direction away from the pointer (or a random shove on touch).
                 var px = (evt && evt.clientX != null) ? evt.clientX : btnX + (Math.random() - 0.5) * 200;
@@ -681,34 +703,16 @@
                 var dy = btnY - py;
                 var dist = Math.hypot(dx, dy) || 1;
 
-                if (!dodging) {
-                    btn.style.position = 'relative';
-                    btn.style.transition = 'left 220ms cubic-bezier(.18,.89,.32,1.28), top 220ms cubic-bezier(.18,.89,.32,1.28)';
-                    dodging = true;
-                }
-
                 var jump = 140 + Math.random() * 120;
-                var curLeft = parseFloat(btn.style.left) || 0;
-                var curTop = parseFloat(btn.style.top) || 0;
-                var nextLeft = curLeft + (dx / dist) * jump + (Math.random() - 0.5) * 80;
-                var nextTop = curTop + (dy / dist) * jump + (Math.random() - 0.5) * 80;
+                var nextX = x + (dx / dist) * jump + (Math.random() - 0.5) * 80;
+                var nextY = y + (dy / dist) * jump + (Math.random() - 0.5) * 80;
 
-                // The button's natural (un-offset) position on screen.
-                var naturalLeft = rect.left - curLeft;
-                var naturalTop = rect.top - curTop;
+                // Keep the WHOLE pill inside the viewport.
+                x = clamp(nextX, pad, window.innerWidth - w - pad);
+                y = clamp(nextY, pad, window.innerHeight - h - pad);
 
-                // Keep the WHOLE pill inside the viewport, with a small margin.
-                var pad = 12;
-                var minAbsLeft = pad;
-                var maxAbsLeft = window.innerWidth - rect.width - pad;
-                var minAbsTop = pad;
-                var maxAbsTop = window.innerHeight - rect.height - pad;
-
-                var absLeft = Math.max(minAbsLeft, Math.min(maxAbsLeft, naturalLeft + nextLeft));
-                var absTop = Math.max(minAbsTop, Math.min(maxAbsTop, naturalTop + nextTop));
-
-                btn.style.left = (absLeft - naturalLeft) + 'px';
-                btn.style.top = (absTop - naturalTop) + 'px';
+                btn.style.left = x + 'px';
+                btn.style.top = y + 'px';
             }
 
             btn.addEventListener('mouseenter', leap);
@@ -722,6 +726,15 @@
                 e.preventDefault();
                 leap(e.touches && e.touches[0]);
             }, { passive: false });
+
+            // If the window resizes, make sure it stays reachable on screen.
+            window.addEventListener('resize', function () {
+                if (!dodging) return;
+                x = clamp(x, 12, window.innerWidth - w - 12);
+                y = clamp(y, 12, window.innerHeight - h - 12);
+                btn.style.left = x + 'px';
+                btn.style.top = y + 'px';
+            });
         })();
     </script>
 </body>
