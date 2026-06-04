@@ -762,8 +762,17 @@
                 explode(x + w / 2, y + h / 2);
                 btn.textContent = 'you win 🎉';
                 btn.classList.add('caught');
-                // Let it gently drift back into reach and stay put.
-                btn.style.transition = 'left 420ms ease, top 420ms ease';
+                // Drop back into the hero where it started, in normal flow.
+                btn.style.position = '';
+                btn.style.margin = '';
+                btn.style.zIndex = '';
+                btn.style.width = '';
+                btn.style.height = '';
+                btn.style.whiteSpace = '';
+                btn.style.boxSizing = '';
+                btn.style.left = '';
+                btn.style.top = '';
+                btn.style.transition = '';
             }
 
             // Back to square one: strip the fixed positioning and start the game over.
