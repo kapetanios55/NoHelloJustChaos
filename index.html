@@ -678,6 +678,7 @@
             var attempts = 0;
             var lastLeap = 0;
             var x = 0, y = 0, w = 0, h = 0; // own viewport-space state (top-left + size)
+            var originalText = btn.textContent;
 
             // Escalating trash talk, swapped in on each dodge.
             var taunts = [
@@ -765,6 +766,26 @@
                 btn.style.transition = 'left 420ms ease, top 420ms ease';
             }
 
+            // Back to square one: strip the fixed positioning and start the game over.
+            function reset() {
+                caught = false;
+                dodging = false;
+                attempts = 0;
+                lastLeap = 0;
+                btn.classList.remove('caught');
+                btn.textContent = originalText;
+                btn.style.position = '';
+                btn.style.margin = '';
+                btn.style.zIndex = '';
+                btn.style.width = '';
+                btn.style.height = '';
+                btn.style.whiteSpace = '';
+                btn.style.boxSizing = '';
+                btn.style.left = '';
+                btn.style.top = '';
+                btn.style.transition = '';
+            }
+
             function leap(evt, force) {
                 if (caught) return;
 
@@ -837,8 +858,8 @@
             btn.addEventListener('mouseenter', function (e) { leap(e, true); });
             btn.addEventListener('mousemove', function (e) { leap(e, false); });
             btn.addEventListener('click', function (e) {
-                if (caught) return; // surrendered: let the link work and scroll to #chaos
                 e.preventDefault();
+                if (caught) { reset(); return; } // surrendered: clicking resets the chase
                 leap(e, true);
             });
             // Mobile: poking it just makes it bolt too.
