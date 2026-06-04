@@ -693,14 +693,22 @@
                 var nextLeft = curLeft + (dx / dist) * jump + (Math.random() - 0.5) * 80;
                 var nextTop = curTop + (dy / dist) * jump + (Math.random() - 0.5) * 80;
 
-                // Keep it within the viewport so it never escapes the page.
-                var maxX = (window.innerWidth - rect.width) / 2 - 12;
-                var maxY = window.innerHeight - rect.height - 12;
-                nextLeft = Math.max(-maxX, Math.min(maxX, nextLeft));
-                nextTop = Math.max(-(rect.top - 12), Math.min(maxY - rect.top, nextTop));
+                // The button's natural (un-offset) position on screen.
+                var naturalLeft = rect.left - curLeft;
+                var naturalTop = rect.top - curTop;
 
-                btn.style.left = nextLeft + 'px';
-                btn.style.top = nextTop + 'px';
+                // Keep the WHOLE pill inside the viewport, with a small margin.
+                var pad = 12;
+                var minAbsLeft = pad;
+                var maxAbsLeft = window.innerWidth - rect.width - pad;
+                var minAbsTop = pad;
+                var maxAbsTop = window.innerHeight - rect.height - pad;
+
+                var absLeft = Math.max(minAbsLeft, Math.min(maxAbsLeft, naturalLeft + nextLeft));
+                var absTop = Math.max(minAbsTop, Math.min(maxAbsTop, naturalTop + nextTop));
+
+                btn.style.left = (absLeft - naturalLeft) + 'px';
+                btn.style.top = (absTop - naturalTop) + 'px';
             }
 
             btn.addEventListener('mouseenter', leap);
