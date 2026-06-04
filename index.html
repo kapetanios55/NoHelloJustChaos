@@ -244,6 +244,29 @@
             .btn.danger { animation: none; }
         }
 
+        /* ---------- chaos button speed trail ---------- */
+        .chaos-ghost {
+            position: fixed;
+            margin: 0;
+            pointer-events: none;
+            z-index: 9998;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--crimson), #b30f31);
+            color: var(--ink);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            white-space: nowrap;
+            will-change: opacity, transform;
+            animation: ghost-fade 460ms ease-out forwards;
+        }
+        @keyframes ghost-fade {
+            0%   { opacity: 0.55; filter: blur(0.5px); transform: scale(1); }
+            100% { opacity: 0;    filter: blur(3px);   transform: scale(0.86); }
+        }
+
         /* ---------- sections ---------- */
         section.block { padding: 28px 0; }
         h2.section-title {
@@ -627,10 +650,29 @@
 
             var dodging = false;
 
+            // Drop a fading clone at the button's current spot, Flash-style.
+            function spawnGhost(rect) {
+                var ghost = document.createElement('span');
+                ghost.className = 'chaos-ghost';
+                ghost.textContent = btn.textContent;
+                ghost.style.left = rect.left + 'px';
+                ghost.style.top = rect.top + 'px';
+                ghost.style.width = rect.width + 'px';
+                ghost.style.height = rect.height + 'px';
+                ghost.style.justifyContent = 'center';
+                document.body.appendChild(ghost);
+                ghost.addEventListener('animationend', function () {
+                    ghost.remove();
+                });
+            }
+
             function leap(evt) {
                 var rect = btn.getBoundingClientRect();
                 var btnX = rect.left + rect.width / 2;
                 var btnY = rect.top + rect.height / 2;
+
+                // Leave an after-image where it was standing.
+                spawnGhost(rect);
 
                 // Direction away from the pointer (or a random shove on touch).
                 var px = (evt && evt.clientX != null) ? evt.clientX : btnX + (Math.random() - 0.5) * 200;
