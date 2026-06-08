@@ -383,6 +383,8 @@
         #takeover.show { display: grid; animation: takeover-in 700ms ease both; }
         @keyframes takeover-in { from { opacity: 0; } to { opacity: 1; } }
         #takeover .tk-inner { position: relative; z-index: 2; padding: 24px; }
+        #takeover .tk-stage { display: none; }
+        #takeover .tk-stage.active { display: block; }
         #takeover .tk-quote {
             font-size: clamp(2.2rem, 9vw, 6rem);
             font-weight: 700;
@@ -394,6 +396,12 @@
             color: transparent;
             text-shadow: 0 0 50px rgba(255,42,92,0.25);
             animation: tk-rise 1.4s ease both;
+        }
+        #takeover .tk-quote.bane {
+            font-size: clamp(1.5rem, 5.4vw, 3.4rem);
+            line-height: 1.18;
+            max-width: 14ch;
+            margin: 0 auto;
         }
         @keyframes tk-rise { from { opacity: 0; transform: translateY(30px) scale(0.96); } to { opacity: 1; transform: none; } }
         #takeover .tk-sub {
@@ -809,8 +817,14 @@
 
     <div id="takeover" aria-hidden="true">
         <div class="tk-inner">
-            <div class="tk-quote">Chaos<br>is a ladder.</div>
-            <div class="tk-sub">&mdash; and you just climbed it</div>
+            <div class="tk-stage active" id="tk-stage-1">
+                <div class="tk-quote">Chaos<br>is a ladder.</div>
+                <div class="tk-sub">&mdash; and you just climbed it</div>
+            </div>
+            <div class="tk-stage" id="tk-stage-2">
+                <div class="tk-quote bane">You merely adopted the chaos. I was born in it, molded by it.</div>
+                <div class="tk-sub">&mdash; you didn't see order until it was nothing to you but blinding</div>
+            </div>
             <div class="tk-close"><button class="btn" id="tk-close" type="button">climb back down</button></div>
         </div>
     </div>
@@ -1111,6 +1125,30 @@
                 takeover.classList.add('show');
                 takeover.setAttribute('aria-hidden', 'false');
                 playChaosTheme();
+                scheduleBaneStage();
+            }
+
+            // After the ladder line lands, cut to Bane's line.
+            var stageTimer = null;
+            function scheduleBaneStage() {
+                var s1 = document.getElementById('tk-stage-1');
+                var s2 = document.getElementById('tk-stage-2');
+                if (!s1 || !s2) return;
+                if (stageTimer) clearTimeout(stageTimer);
+                stageTimer = setTimeout(function () {
+                    s1.classList.remove('active');
+                    s2.classList.add('active');
+                    // re-trigger the rise animation on the new quote
+                    var q = s2.querySelector('.tk-quote');
+                    if (q) { q.style.animation = 'none'; void q.offsetWidth; q.style.animation = ''; }
+                }, 4200);
+            }
+            function resetStages() {
+                if (stageTimer) { clearTimeout(stageTimer); stageTimer = null; }
+                var s1 = document.getElementById('tk-stage-1');
+                var s2 = document.getElementById('tk-stage-2');
+                if (s1) s1.classList.add('active');
+                if (s2) s2.classList.remove('active');
             }
 
             var closeBtn = document.getElementById('tk-close');
@@ -1119,6 +1157,7 @@
                     takeover.classList.remove('show');
                     takeover.setAttribute('aria-hidden', 'true');
                     stopChaosTheme();
+                    resetStages();
                 });
             }
 
