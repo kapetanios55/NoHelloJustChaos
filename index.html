@@ -292,6 +292,136 @@
             50%      { box-shadow: 0 0 24px 6px rgba(255,42,92,0.45); }
         }
 
+        /* ---------- chat composer (the code bar) ---------- */
+        .composer {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            margin-top: auto;
+            background: var(--bg-elev-2);
+            border-top: 1px solid var(--line);
+        }
+        .composer input {
+            flex: 1;
+            min-width: 0;
+            background: var(--bg);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 9px 16px;
+            color: var(--ink);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            letter-spacing: 0.06em;
+            outline: none;
+            transition: border-color 120ms ease, box-shadow 120ms ease;
+        }
+        .composer input::placeholder { color: var(--ink-mute); }
+        .composer input:focus { border-color: var(--crimson); box-shadow: 0 0 0 3px rgba(220,20,60,0.15); }
+        .composer button {
+            flex: 0 0 auto;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--crimson), #b30f31);
+            color: #fff;
+            border-radius: 50%;
+            width: 38px; height: 38px;
+            display: grid; place-items: center;
+            transition: transform 120ms ease, filter 120ms ease;
+        }
+        .composer button:hover { filter: brightness(1.12); transform: translateY(-1px); }
+        .composer.wrong input { animation: composer-shake 420ms; border-color: var(--crimson-glow); color: var(--crimson-glow); }
+        @keyframes composer-shake {
+            10%, 90% { transform: translateX(-2px); }
+            20%, 80% { transform: translateX(3px); }
+            30%, 50%, 70% { transform: translateX(-6px); }
+            40%, 60% { transform: translateX(6px); }
+        }
+
+        /* ---------- QR reveal (capture the flag) ---------- */
+        .qr-reveal {
+            margin: 26px auto 0;
+            max-width: 560px;
+            display: none;
+            grid-template-columns: auto 1fr;
+            gap: 20px;
+            align-items: center;
+            text-align: left;
+            padding: 18px 20px;
+            background: linear-gradient(135deg, rgba(220,20,60,0.10), rgba(167,139,250,0.06));
+            border: 1px solid rgba(220,20,60,0.3);
+            border-radius: var(--radius);
+        }
+        .qr-reveal.show { display: grid; animation: qr-in 520ms ease both; }
+        @keyframes qr-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+        .qr-reveal .qr-box {
+            background: #fff;
+            padding: 10px;
+            border-radius: 12px;
+            width: 128px; height: 128px;
+            flex: 0 0 auto;
+        }
+        .qr-reveal .qr-box img { width: 100%; height: 100%; }
+        .qr-reveal h3 { margin: 0 0 6px; font-size: 1.1rem; }
+        .qr-reveal p { margin: 0; color: var(--ink-dim); font-size: 14px; }
+        .qr-reveal code { color: var(--crimson-glow); font-family: 'JetBrains Mono', monospace; }
+        @media (max-width: 540px) {
+            .qr-reveal { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+        }
+
+        /* ---------- "Chaos is a ladder" takeover ---------- */
+        #takeover {
+            position: fixed;
+            inset: 0;
+            z-index: 100000;
+            display: none;
+            place-items: center;
+            text-align: center;
+            background: radial-gradient(circle at 50% 28%, #1a0309, #050507 72%);
+            overflow: hidden;
+        }
+        #takeover.show { display: grid; animation: takeover-in 700ms ease both; }
+        @keyframes takeover-in { from { opacity: 0; } to { opacity: 1; } }
+        #takeover .tk-inner { position: relative; z-index: 2; padding: 24px; }
+        #takeover .tk-quote {
+            font-size: clamp(2.2rem, 9vw, 6rem);
+            font-weight: 700;
+            line-height: 1.02;
+            letter-spacing: -0.02em;
+            background: linear-gradient(180deg, #fff, var(--crimson-glow));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 50px rgba(255,42,92,0.25);
+            animation: tk-rise 1.4s ease both;
+        }
+        @keyframes tk-rise { from { opacity: 0; transform: translateY(30px) scale(0.96); } to { opacity: 1; transform: none; } }
+        #takeover .tk-sub {
+            margin-top: 18px;
+            color: var(--ink-dim);
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-size: 13px;
+            animation: tk-rise 1.4s 0.3s ease both;
+        }
+        #takeover .tk-close { margin-top: 30px; animation: tk-rise 1.4s 0.6s ease both; }
+        #takeover .rung {
+            position: absolute;
+            left: 0; right: 0;
+            height: 2px;
+            background: rgba(255,42,92,0.22);
+            animation: rung-climb linear infinite;
+        }
+        @keyframes rung-climb {
+            from { transform: translateY(110vh); }
+            to   { transform: translateY(-10vh); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            #takeover.show, #takeover .tk-quote, #takeover .tk-sub, #takeover .tk-close { animation: none; }
+            #takeover .rung { display: none; }
+        }
+
         /* ---------- sections ---------- */
         section.block { padding: 28px 0; }
         h2.section-title {
@@ -513,6 +643,13 @@
                     View on GitHub
                 </a>
             </div>
+            <div class="qr-reveal" id="qr-reveal" aria-live="polite">
+                <div class="qr-box"><img src="qr.svg" alt="QR code to the next clue" /></div>
+                <div>
+                    <h3>You caught the chaos. It isn't done with you.</h3>
+                    <p>Scan the code. Solve what waits there. Then whisper the answer into the <code>#incidents</code> channel below.</p>
+                </div>
+            </div>
         </header>
 
         <section class="block" id="chaos">
@@ -614,6 +751,12 @@
                             </div>
                         </div>
                     </div>
+                    <form class="composer" id="code-form" autocomplete="off">
+                        <input id="code-input" type="text" placeholder="type the code&hellip;" aria-label="enter the secret code" maxlength="32" />
+                        <button type="submit" aria-label="send code" title="send">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+                        </button>
+                    </form>
                 </article>
             </div>
         </section>
@@ -663,6 +806,14 @@
             <span>Powered by <a href="https://pages.github.com">GitHub Pages</a> and way too much caffeine ☕</span>
         </footer>
     </main>
+
+    <div id="takeover" aria-hidden="true">
+        <div class="tk-inner">
+            <div class="tk-quote">Chaos<br>is a ladder.</div>
+            <div class="tk-sub">&mdash; and you just climbed it</div>
+            <div class="tk-close"><button class="btn" id="tk-close" type="button">climb back down</button></div>
+        </div>
+    </div>
 
     <script>
         // The "See the chaos" button refuses to be caught.
@@ -762,6 +913,14 @@
                 explode(x + w / 2, y + h / 2);
                 btn.textContent = 'you win 🎉';
                 btn.classList.add('caught');
+                // Reveal the next stage of the hunt.
+                var qr = document.getElementById('qr-reveal');
+                if (qr) {
+                    qr.classList.add('show');
+                    setTimeout(function () {
+                        qr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 420);
+                }
                 // Drop back into the hero where it started, in normal flow.
                 btn.style.position = '';
                 btn.style.margin = '';
@@ -886,6 +1045,141 @@
                 btn.style.left = x + 'px';
                 btn.style.top = y + 'px';
             });
+        })();
+
+        // Capture-the-flag: scan the QR, solve the riddle, type the word here.
+        (function () {
+            var form = document.getElementById('code-form');
+            var input = document.getElementById('code-input');
+            var takeover = document.getElementById('takeover');
+            if (!form || !input || !takeover) return;
+
+            // SHA-256 of the answer, so the word isn't sitting in the page source.
+            var ANSWER_HASH = '5605a516a7ebf33bbfc1189be3b201f380d9c721b124098eda2894544e2771d7';
+            var defaultPlaceholder = input.getAttribute('placeholder');
+            var solved = false;
+
+            function sha256(text) {
+                var bytes = new TextEncoder().encode(text);
+                return crypto.subtle.digest('SHA-256', bytes).then(function (buf) {
+                    return Array.prototype.map.call(new Uint8Array(buf), function (b) {
+                        return b.toString(16).padStart(2, '0');
+                    }).join('');
+                });
+            }
+
+            function reject() {
+                form.classList.add('wrong');
+                input.value = '';
+                input.setAttribute('placeholder', "nope. that isn't it.");
+                setTimeout(function () { form.classList.remove('wrong'); }, 460);
+            }
+
+            input.addEventListener('input', function () {
+                form.classList.remove('wrong');
+                input.setAttribute('placeholder', defaultPlaceholder);
+            });
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                if (solved) return;
+                var guess = input.value.trim().toLowerCase();
+                if (!guess) return;
+                sha256(guess).then(function (hash) {
+                    if (hash === ANSWER_HASH) {
+                        solved = true;
+                        input.blur();
+                        triggerTakeover();
+                    } else {
+                        reject();
+                    }
+                }).catch(function () { /* crypto unavailable: stay quiet */ });
+            });
+
+            function triggerTakeover() {
+                if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                    for (var i = 0; i < 14; i++) {
+                        var r = document.createElement('div');
+                        r.className = 'rung';
+                        r.style.top = '0';
+                        r.style.animationDuration = (3 + Math.random() * 4) + 's';
+                        r.style.animationDelay = (-Math.random() * 6) + 's';
+                        r.style.opacity = (0.1 + Math.random() * 0.3).toFixed(2);
+                        takeover.appendChild(r);
+                    }
+                }
+                takeover.classList.add('show');
+                takeover.setAttribute('aria-hidden', 'false');
+                playChaosTheme();
+            }
+
+            var closeBtn = document.getElementById('tk-close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function () {
+                    takeover.classList.remove('show');
+                    takeover.setAttribute('aria-hidden', 'true');
+                    stopChaosTheme();
+                });
+            }
+
+            // ----- the chaos theme: an original ominous, climbing synth motif -----
+            var audioCtx = null, themeNodes = [], themeTimer = null, themeTimeout = null;
+            function playChaosTheme() {
+                if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+                try {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) { return; }
+                var ctx = audioCtx;
+                var master = ctx.createGain();
+                master.gain.value = 0.0001;
+                master.connect(ctx.destination);
+                master.gain.exponentialRampToValueAtTime(0.22, ctx.currentTime + 0.6);
+
+                // low menacing drone
+                var drone = ctx.createOscillator();
+                drone.type = 'sawtooth';
+                drone.frequency.value = 55;
+                var droneGain = ctx.createGain();
+                droneGain.gain.value = 0.16;
+                var droneFilter = ctx.createBiquadFilter();
+                droneFilter.type = 'lowpass';
+                droneFilter.frequency.value = 320;
+                drone.connect(droneFilter).connect(droneGain).connect(master);
+                drone.start();
+                themeNodes.push(drone);
+
+                // a relentless climb, like rungs on a ladder
+                var scale = [220, 261.63, 293.66, 349.23, 392, 466.16, 523.25, 587.33];
+                var step = 0;
+                function playNote() {
+                    var o = ctx.createOscillator();
+                    var g = ctx.createGain();
+                    o.type = (step % 8 === 7) ? 'sawtooth' : 'triangle';
+                    o.frequency.value = scale[step % scale.length];
+                    o.connect(g); g.connect(master);
+                    var t = ctx.currentTime;
+                    g.gain.setValueAtTime(0.0001, t);
+                    g.gain.exponentialRampToValueAtTime(0.24, t + 0.03);
+                    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
+                    o.start(t);
+                    o.stop(t + 0.55);
+                    step++;
+                }
+                playNote();
+                themeTimer = setInterval(playNote, 250);
+                // fade out on its own after a while if left open
+                themeTimeout = setTimeout(stopChaosTheme, 28000);
+            }
+            function stopChaosTheme() {
+                if (themeTimer) { clearInterval(themeTimer); themeTimer = null; }
+                if (themeTimeout) { clearTimeout(themeTimeout); themeTimeout = null; }
+                if (audioCtx) {
+                    var ctx = audioCtx;
+                    themeNodes.forEach(function (n) { try { n.stop(); } catch (e) {} });
+                    setTimeout(function () { try { ctx.close(); } catch (e) {} }, 200);
+                    audioCtx = null; themeNodes = [];
+                }
+            }
         })();
     </script>
 </body>
