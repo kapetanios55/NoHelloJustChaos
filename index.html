@@ -396,33 +396,38 @@
         #takeover .tk-inner {
             position: relative;
             z-index: 2;
-            width: min(720px, 92vw);
-            padding: 34px clamp(20px, 5vw, 56px) 30px;
-            background: rgba(7,14,26,0.72);
-            border: 1px solid rgba(56,189,248,0.55);
-            border-radius: 14px;
-            box-shadow: 0 0 60px rgba(56,189,248,0.22), inset 0 0 40px rgba(56,189,248,0.06);
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(24px, 6vw, 64px);
             animation: tk-frame 600ms ease both;
         }
-        @keyframes tk-frame { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: none; } }
-        /* glowing corner brackets */
+        @keyframes tk-frame { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: none; } }
+        /* glowing corner brackets pinned to the screen edges */
         #takeover .tk-inner::before,
         #takeover .tk-inner::after {
             content: "";
-            position: absolute;
-            width: 26px; height: 26px;
+            position: fixed;
+            width: 42px; height: 42px;
             border: 2px solid var(--sky);
-            box-shadow: 0 0 12px rgba(56,189,248,0.6);
+            box-shadow: 0 0 14px rgba(56,189,248,0.6);
+            z-index: 4;
         }
-        #takeover .tk-inner::before { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
-        #takeover .tk-inner::after  { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+        #takeover .tk-inner::before { top: 22px; left: 22px; border-right: 0; border-bottom: 0; }
+        #takeover .tk-inner::after  { bottom: 22px; right: 22px; border-left: 0; border-top: 0; }
         #takeover .sys-banner {
+            position: fixed;
+            top: clamp(20px, 5vh, 48px);
+            left: 0; right: 0;
+            z-index: 4;
             font-family: 'JetBrains Mono', monospace;
             font-size: clamp(11px, 2.6vw, 13px);
             letter-spacing: 0.28em;
             text-transform: uppercase;
             color: #bfe9fb;
-            margin-bottom: 22px;
             animation: sys-flicker 2.6s infinite;
         }
         #takeover .sys-banner b { color: #fff; }
