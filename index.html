@@ -544,6 +544,33 @@
             0%, 100% { transform: scale(1); }
             50%      { transform: scale(1.08); }
         }
+
+        /* ---------- secret thread (unlocked after the riddle) ---------- */
+        .avatar.unknown {
+            background: linear-gradient(135deg, var(--crimson), #7a0a1f);
+            color: #fff;
+            box-shadow: 0 0 14px rgba(255,42,92,0.55);
+            animation: unknown-pulse 1.8s ease-in-out infinite;
+        }
+        @keyframes unknown-pulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(255,42,92,0.4); }
+            50%      { box-shadow: 0 0 20px rgba(255,42,92,0.7); }
+        }
+        .msg.unknown .bubble {
+            background: rgba(220,20,60,0.14);
+            border: 1px solid rgba(220,20,60,0.35);
+        }
+        .msg.unknown .meta { color: var(--crimson-glow); }
+        .secret-thread { display: none; flex-direction: column; gap: 10px; }
+        .secret-thread.revealed { display: flex; }
+        .secret-msg { opacity: 0; transform: translateY(8px); transition: opacity 380ms ease, transform 380ms ease; }
+        .secret-msg.show { opacity: 1; transform: none; }
+        .bubble.achievement {
+            background: linear-gradient(135deg, rgba(245,158,11,0.14), rgba(220,20,60,0.10));
+            border: 1px solid rgba(245,158,11,0.45);
+            box-shadow: 0 0 18px rgba(245,158,11,0.18);
+        }
+        .bubble.achievement strong { color: var(--amber); }
         .typing {
             display: inline-flex;
             gap: 4px;
@@ -694,9 +721,43 @@
                                 I&rsquo;m great! Quick question about the project&hellip;
                             </div>
                         </div>
-                        <div class="msg coworker" aria-hidden="true">
+                        <div class="msg coworker" id="general-typing" aria-hidden="true">
                             <div class="avatar coworker">C</div>
                             <div class="typing"><span></span><span></span><span></span></div>
+                        </div>
+                        <div class="secret-thread" id="secret-thread" aria-live="polite">
+                            <div class="msg unknown secret-msg">
+                                <div class="avatar unknown">?</div>
+                                <div class="bubble">
+                                    <span class="meta">??? &middot; now</span>
+                                    So&hellip; you solved the riddle, didn&rsquo;t you?
+                                </div>
+                            </div>
+                            <div class="msg unknown secret-msg">
+                                <div class="avatar unknown">?</div>
+                                <div class="bubble">
+                                    <span class="meta">??? &middot; now</span>
+                                    Most people just say &ldquo;hello&rdquo; and wait. You climbed the whole ladder.
+                                </div>
+                            </div>
+                            <div class="msg unknown secret-msg">
+                                <div class="avatar unknown">?</div>
+                                <div class="bubble">
+                                    <span class="meta">??? &middot; now</span>
+                                    There are no coworkers here. There never were. Only the chaos. And now, you.
+                                </div>
+                            </div>
+                            <div class="msg unknown secret-msg">
+                                <div class="avatar unknown">?</div>
+                                <div class="bubble achievement">
+                                    <span class="meta">system &middot; now</span>
+                                    <strong>🏆 Achievement unlocked: Architect of Chaos</strong>
+                                </div>
+                            </div>
+                            <div class="msg unknown" id="secret-typing" aria-hidden="true" style="display:none">
+                                <div class="avatar unknown">?</div>
+                                <div class="typing"><span></span><span></span><span></span></div>
+                            </div>
                         </div>
                     </div>
                 </article>
@@ -1094,6 +1155,44 @@
                 input.setAttribute('placeholder', defaultPlaceholder);
             });
 
+            // The friendly #general chat drops its mask once you've solved it.
+            function revealSecretThread(instant) {
+                var thread = document.getElementById('secret-thread');
+                if (!thread || thread.classList.contains('revealed')) return;
+                thread.classList.add('revealed');
+                var coworkerTyping = document.getElementById('general-typing');
+                if (coworkerTyping) coworkerTyping.style.display = 'none';
+                var msgs = thread.querySelectorAll('.secret-msg');
+                var typing = document.getElementById('secret-typing');
+
+                if (instant || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                    msgs.forEach(function (m) { m.classList.add('show'); });
+                    if (typing) typing.style.display = 'none';
+                    return;
+                }
+
+                var i = 0;
+                (function next() {
+                    if (i >= msgs.length) { if (typing) typing.style.display = 'none'; return; }
+                    if (typing) typing.style.display = '';
+                    setTimeout(function () {
+                        if (typing) typing.style.display = 'none';
+                        msgs[i].classList.add('show');
+                        msgs[i].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        i++;
+                        setTimeout(next, 520);
+                    }, 780);
+                })();
+            }
+
+            // Returning solver? Keep the thread unlocked, no theatrics.
+            try {
+                if (localStorage.getItem('chaos_solved') === '1') {
+                    solved = true;
+                    revealSecretThread(true);
+                }
+            } catch (e) {}
+
             form.addEventListener('submit', function (e) {
                 e.preventDefault();
                 if (solved) return;
@@ -1103,7 +1202,9 @@
                     if (hash === ANSWER_HASH) {
                         solved = true;
                         input.blur();
+                        try { localStorage.setItem('chaos_solved', '1'); } catch (e) {}
                         triggerTakeover();
+                        revealSecretThread(false);
                     } else {
                         reject();
                     }
