@@ -382,16 +382,20 @@
         }
         #takeover.show { display: grid; }
         /* a light dim so the card reads as a popup, page still visible behind */
-        #takeover .tk-scrim {
+        .tk-scrim {
             position: fixed;
             inset: 0;
+            z-index: 99990;
             background: rgba(2,4,10,0.55);
             backdrop-filter: blur(2px);
             opacity: 0;
-            transition: opacity 400ms ease;
-            pointer-events: auto;
+            visibility: hidden;
+            transition: opacity 400ms ease, visibility 400ms ease;
+            pointer-events: none;
         }
-        #takeover.show .tk-scrim { opacity: 1; }
+        body.system-open .tk-scrim { opacity: 1; visibility: visible; pointer-events: auto; }
+        /* spotlight the conversation so the System's messages stay crisp and readable */
+        body.system-open #chaos .chat-grid { position: relative; z-index: 99995; }
         #takeover .tk-inner {
             position: relative;
             z-index: 2;
@@ -970,8 +974,8 @@
         </footer>
     </main>
 
+    <div class="tk-scrim" id="tk-scrim"></div>
     <div id="takeover" aria-hidden="true">
-        <div class="tk-scrim" id="tk-scrim"></div>
         <div class="tk-inner" role="dialog" aria-label="System notification">
             <div class="tk-content">
                 <div class="sys-banner">&#9888; System &middot; <b>[ Dungeon Cleared ]</b></div>
@@ -1302,6 +1306,7 @@
 
             function triggerTakeover() {
                 takeover.classList.add('show');
+                document.body.classList.add('system-open');
                 takeover.setAttribute('aria-hidden', 'false');
                 playNotificationSound();
                 scheduleBaneStage();
@@ -1333,6 +1338,7 @@
             var closeBtn = document.getElementById('tk-close');
             function closeTakeover() {
                 takeover.classList.remove('show');
+                document.body.classList.remove('system-open');
                 takeover.setAttribute('aria-hidden', 'true');
                 resetStages();
             }
