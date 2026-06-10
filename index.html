@@ -1185,14 +1185,6 @@
                 })();
             }
 
-            // Returning solver? Keep the thread unlocked, no theatrics.
-            try {
-                if (localStorage.getItem('chaos_solved') === '1') {
-                    solved = true;
-                    revealSecretThread(true);
-                }
-            } catch (e) {}
-
             form.addEventListener('submit', function (e) {
                 e.preventDefault();
                 if (solved) return;
@@ -1202,7 +1194,6 @@
                     if (hash === ANSWER_HASH) {
                         solved = true;
                         input.blur();
-                        try { localStorage.setItem('chaos_solved', '1'); } catch (e) {}
                         triggerTakeover();
                         revealSecretThread(false);
                     } else {
