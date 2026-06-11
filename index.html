@@ -365,6 +365,16 @@
         .qr-reveal h3 { margin: 0 0 6px; font-size: 1.1rem; }
         .qr-reveal p { margin: 0; color: var(--ink-dim); font-size: 14px; }
         .qr-reveal code { color: var(--crimson-glow); font-family: 'JetBrains Mono', monospace; }
+        .qr-reveal .qr-fallback {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 13px;
+            color: var(--crimson-glow);
+            text-decoration: none;
+            border-bottom: 1px dotted var(--crimson-glow);
+            padding-bottom: 1px;
+        }
+        .qr-reveal .qr-fallback:hover { color: #fff; border-bottom-color: #fff; }
         @media (max-width: 540px) {
             .qr-reveal { grid-template-columns: 1fr; justify-items: center; text-align: center; }
         }
@@ -775,6 +785,7 @@
                 <div>
                     <h3>You caught the chaos. It isn't done with you.</h3>
                     <p>Scan the code. Solve what waits there. Then whisper the answer into the <code>#incidents</code> channel below.</p>
+                    <a class="qr-fallback" href="clue.html">not chaotic enough to scan it? take the easy way in &rarr;</a>
                 </div>
             </div>
         </header>
